@@ -8,6 +8,14 @@ namespace WebPracticalTask.Controllers
     [Route("[controller]")]
     public class StringHandlerController : ControllerBase
     {
+        private readonly RequestLimiterService _limiterService;
+
+        public StringHandlerController(RequestLimiterService limiterService)
+        {
+            _limiterService = limiterService;
+        }
+
+
         [HttpGet]
         public async Task<IActionResult> GetString(string text, string sort, [FromServices] IOptions<BlacklistSettings> blacklistOptions) 
         {
@@ -32,6 +40,13 @@ namespace WebPracticalTask.Controllers
             {
                 return Ok(result);
             }
+        }
+
+        [HttpGet("status")]
+        public IActionResult GetServiceStatus()
+        {
+            var status = _limiterService.GetStatus();
+            return Ok($"Current: {status.current}, Limit: {status.limit}");
         }
     }
 }
