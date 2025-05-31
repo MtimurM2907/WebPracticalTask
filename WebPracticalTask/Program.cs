@@ -7,6 +7,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<Logics>();
+builder.Services.Configure<BlacklistSettings>(builder.Configuration.GetSection("Settings"));
 
 var app = builder.Build();
 
