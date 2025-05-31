@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using WebPracticalTask.ProgramLogic;
 
 namespace WebPracticalTask.Controllers
@@ -8,8 +9,14 @@ namespace WebPracticalTask.Controllers
     public class StringHandlerController : ControllerBase
     {
         [HttpGet]
-        public async Task<IActionResult> GetString(string text, string sort) 
+        public async Task<IActionResult> GetString(string text, string sort, [FromServices] IOptions<BlacklistSettings> blacklistOptions) 
         {
+            var blacklist = blacklistOptions.Value.BlackList;
+            if (blacklist != null && blacklist.Any(bannedWord => text.Contains(bannedWord, StringComparison.OrdinalIgnoreCase)))
+            {
+                return BadRequest("Текст содержит запрещенные слова");
+            }
+
             var result = await Logics.StartLogic(text, sort);
 
             Logics.text = "\0";
@@ -17,7 +24,7 @@ namespace WebPracticalTask.Controllers
             Logics.sortSelection = "\0";
             Logics.finalMessage = "\0";
             Sorting.finalTextIndex.Clear();
-            if (result.ToString().Contains("Произошла ошибка:"))
+            if (result.Contains("Произошла ошибка:"))
             {
                 return BadRequest(result);
             }
